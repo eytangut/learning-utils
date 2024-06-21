@@ -1,3 +1,4 @@
 .venv
 .idx
 .idx/dev.nix
+*.nix
