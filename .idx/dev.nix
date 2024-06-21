@@ -21,7 +21,7 @@
       previews = {
         web = {
           command = [ "./devserver.sh" ];
-          env = { PORT = "$PORT"; };
+          env = { PORT = "$PORT"; DEFAULT_API_KEY = "AIzaSyBOMt2uhS35pBqA0TOKkSDRHGF832IBdnE";};
           manager = "web";
         };
       };
