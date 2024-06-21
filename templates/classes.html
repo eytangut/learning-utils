@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+{% block title %}My Classes{% endblock %}
+{% block main %}
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-create-tab" data-bs-toggle="tab" data-bs-target="#nav-create" type="button" role="tab" aria-controls="nav-create" aria-selected="true">Create a class</button>
+            <button class="nav-link" id="nav-delete-tab" data-bs-toggle="tab" data-bs-target="#nav-delete" type="button" role="tab" aria-controls="nav-delete" aria-selected="true">Delete a class</button>
+
+            {% for class in classes %}
+                <button class="nav-link" id='nav-{{ class[2]|replace(" ", "_") }}-tab' 
+                data-bs-toggle="tab" 
+                data-bs-target='#nav-{{ class[2]|replace(" ", "_") }}' 
+                type="button" role="tab" 
+                aria-controls='nav-{{ class[2]|replace(" ", "_") }}' 
+                aria-selected="false">{{ class[2] }}</button>
+            {% endfor %}
+
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-create" role="tabpanel" aria-labelledby="nav-create-tab">
+            <h1>Welcome To Classes View!</h1>
+            <p>Create a new class here.</p>
+            <form method="post" action="/classes">
+
+                <label for="class_name_create" class="form-label">Class Name</label>
+                <label for="class_desc_create" class="form-label">Class <Desc></Desc></label>
+                <input type="text" class="form-control" id="class_name_create" name="class_name_create" placeholder="Class Name">                <input type="hidden" name="request_type" value="create">
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+
+        </div>
+        <div class="tab-pane fade show" id="nav-delete" role="tabpanel" aria-labelledby="nav-delete-tab">
+            <h1>delete classes</h1>
+            <form method="post" action="/classes">
+
+                <label for="class_name_delete" class="form-label">Class Name</label>
+                <input class="form-control" list="datalistOptions" id="class_name_delete" name="class_name_delete" placeholder="Class Name">
+                <datalist id="datalistOptions">
+                    {% for class in classes %}
+                    <option value='{{ class[2] }}'>{{ class[2] }}</option>
+                    {% endfor %}
+                </datalist>
+                <input type="hidden" name="request_type" value="delete">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+
+        </div>
+        {% for class in classes %}
+            <div class="tab-pane fade" id='nav-{{ class[2]|replace( " ", "_") }}' role="tabpanel" aria-labelledby='nav-{{ class[2]|replace( " ", "_") }}-tab'>
+                <h2>{{ class[2] }}</h2>
+                <hr>
+                <form method="post" action="/classes">
+                    <textarea class="form-control" id="class_desc_edit" name="class_desc_edit" rows="3">{{ class[3] }}</textarea>
+                    <input type="hidden" name="request_type" value="edit_desc">
+                    <input type="hidden" name="class_id" value="{{ class[0] }}">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                
+                <hr>
+                {% if links %}
+                    {% for link in links %}
+                    <a href="{{ link[0] }}" role="button" class="btn btn-primary">{{ link[0] }}</a>    
+                    <form action="/classes" method="post">
+                        <input type="hidden" name="request_type" value="delete_link">
+                        <input type="hidden" name="link_id" value="{{ link[3] }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    {% endfor %}
+                {% endif %}
+                <form action="/classes" method="post">
+                    <input type="hidden" name="request_type" value="add_link">
+                    <input type="text" name="link" placeholder="Link">
+                    <input type="hidden" name="class_id" value="{{ class[0] }}">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+{% endblock %}
