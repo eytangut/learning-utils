@@ -3,10 +3,11 @@ from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
 from cs50 import SQL
 from functools import wraps
-
+import datetime
 
 import sqlite3
 app = Flask(__name__)
+
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
@@ -122,7 +123,14 @@ def account():
     mail = cur.execute('SELECT * FROM mail WHERE user_id = ?', (session['user_id'],)).fetchall()
     print(mail)
     return render_template('account.html', user=user[0], mail=mail)
-
+DEFAULT_API_KEY = os.environ.get('DEFAULT_API_KEY')
+DEFAULT_API_LIMIT = 20
+API_LIMIT = 1500
+def check_api(api_key, lastuse):
+    if api_key == 'DEFAULT':
+        pass
+    else:
+        pass
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
 
