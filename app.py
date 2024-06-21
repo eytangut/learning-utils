@@ -41,7 +41,7 @@ def login():
         print(names)
         print(thing)
         if len(names) == 1:
-            session['user_id'] = names[0][2]
+            session['user_id'] = names[0][0]
             return redirect('/')
         else:
             return render_template('login.html')
@@ -116,7 +116,12 @@ def apology(error, code=400):
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    return render_template('account.html')
+    user = cur.execute('SELECT * FROM users WHERE id = ?', (session["user_id"],)).fetchall()
+    print(session["user_id"])
+    print(user)
+    mail = cur.execute('SELECT * FROM mail WHERE user_id = ?', (session['user_id'],)).fetchall()
+    print(mail)
+    return render_template('account.html', user=user[0], mail=mail)
 
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
