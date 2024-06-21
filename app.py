@@ -113,6 +113,10 @@ def classes():
 def apology(error, code=400):
     """Render message as an apology to user."""
     return render_template("apology.html", error_code=code, error_description=error)
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    return render_template('account.html')
 
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
