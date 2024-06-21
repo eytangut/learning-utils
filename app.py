@@ -1,10 +1,9 @@
 import os
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
-from cs50 import SQL
 from functools import wraps
 import datetime
-
+import google.generativeai as genai
 import sqlite3
 app = Flask(__name__)
 
@@ -13,6 +12,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 con = sqlite3.connect('database.db', check_same_thread=False)
 cur = con.cursor()
+def configure_ai(api_key):
+    genai.configure(api_key=api_key)
+configure_ai(os.environ.get('DEFAULT_API_KEY'))
+model = genai.GenerativeModel('gemini-1.5-flash')
 def login_required(f):
     """
     Decorate routes to require login.
@@ -117,23 +120,53 @@ def apology(error, code=400):
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    user = cur.execute('SELECT * FROM users WHERE id = ?', (session["user_id"],)).fetchall()
-    print(session["user_id"])
-    print(user)
-    mail = cur.execute('SELECT * FROM mail WHERE user_id = ?', (session['user_id'],)).fetchall()
-    print(mail)
-    return render_template('account.html', user=user[0], mail=mail)
+    if request.method == 'POST':
+        cur.execute('UPDATE api_keys SET api_key = ? WHERE user_id = ?', (request.form.get('api_key'), session['user_id']))
+        con.commit()
+        configure_ai(request.form.get('api_key'))
+        return redirect('/account')
+    else:
+        user = cur.execute('SELECT * FROM users WHERE id = ?', (session["user_id"],)).fetchall()
+        print(session["user_id"])
+        print(user)
+        mail = cur.execute('SELECT * FROM mail WHERE user_id = ?', (session['user_id'],)).fetchall()
+        print(mail)
+        return render_template('account.html', user=user[0], mail=mail)
 DEFAULT_API_KEY = os.environ.get('DEFAULT_API_KEY')
 DEFAULT_API_LIMIT = 20
 API_LIMIT = 1500
+current_uses = 0
+LAST_USE = datetime.datetime.now()
 def check_api(api_key, lastuse):
     if api_key == 'DEFAULT':
-        pass
+        if datetime.datetime.now() - lastuse > datetime.timedelta(days=1):
+            LAST_USE = datetime.datetime.now()
+            current_uses = 1
+            return True
+        else:
+            if current_uses < DEFAULT_API_LIMIT:
+                current_uses += 1
+                return True
+            else:
+                return False
     else:
-        pass
+        if datetime.datetime.now() - lastuse > datetime.timedelta(days=1):
+            LAST_USE = datetime.datetime.now()
+            current_uses = 1
+            return True
+        else:
+            if current_uses < API_LIMIT:
+                current_uses += 1
+                return True
+            else:
+                return False
 @app.route('/api-guide')
 def api_guide():
     return render_template('api-guide.html')
+@app.route('/chat', methods=['GET', 'POST'])
+@login_required
+def chat():
+    pass
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
 

@@ -75,7 +75,13 @@
                     <input type="hidden" name="class_id" value="{{ class[0] }}">
                     <button type="submit" class="btn btn-primary">Add</button>
                 </form>
+                <h2>Chat with AI on this class</h2>
+                <form action="/chat" method="post">
+                    <input type="hidden" name="class_id" value="{{ class[0] }}">
+                    <button type="submit" class="btn btn-primary">Chat</button>
+                </form>
             </div>
+
         {% endfor %}
         </div>
 {% endblock %}
