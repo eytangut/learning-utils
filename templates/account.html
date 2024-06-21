@@ -12,8 +12,15 @@
                     <ul>
                         <li>Name: {{ user[1] }}</li>
                         <li>Email: {{ mail[0][0] }}</li>
-                        <li>Api key:</li>              
-                        <!--TODO-->
+                        {% if api_key %}
+                            <li>API Key: {{ api_key }}</li>
+                        {% else %}
+                            <h3>You have not defined an API key. Click <a role="button"  href="/api-guide" class="btn btn-primary">Here</a> to find instructions on how to get one</h3>
+                            <form action="/account" method="post">
+                                <input type="password" placeholder="Api key" class="form-control" name="api_key">
+                                <input type="submit" value="Submit" class="btn btn-primary">
+                            </form>
+                        {% endif %}
 
                     </ul>
                 </div>

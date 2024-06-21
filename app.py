@@ -131,6 +131,9 @@ def check_api(api_key, lastuse):
         pass
     else:
         pass
+@app.route('/api-guide')
+def api_guide():
+    return render_template('api-guide.html')
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
 
