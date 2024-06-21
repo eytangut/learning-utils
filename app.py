@@ -68,7 +68,9 @@ def classes():
         match request.form.get('request_type'):
             case 'create':
                 cur.execute('INSERT INTO classes (class_name, user_id) VALUES (?, ?)', (request.form.get('class_name_create'), session['user_id']))
-                con.commit()     
+                con.commit()
+                cur.execute('INSERT INTO user_classes (user_id, class_id) VALUES (?, ?)', (session['user_id'], cur.lastrowid))
+                con.commit()
                 print(request.form.get('class_name_create'))
             case 'delete':
                 cur.execute('DELETE FROM classes WHERE class_name = ? AND user_id = ?', (request.form.get('class_name_delete'), session['user_id']))
@@ -87,16 +89,25 @@ def classes():
                 cur.execute('INSERT INTO links (url, class_id) VALUES (?, ?)', (request.form.get('link'), request.form.get('class_id')))
         return redirect('/classes')
     else:
-        classes = None
         try:
-            classes = cur.execute('SELECT * FROM classes WHERE user_id = ?', (session['user_id'],)).fetchall()
-            links = cur.execute('SELECT * FROM links WHERE class_id IN (SELECT id FROM classes WHERE user_id = ?)', (session['user_id'],)).fetchall()
+            classes = cur.execute('SELECT * FROM classes WHERE id IN (SELECT class_id FROM user_classes WHERE user_id = ?)', (session['user_id'],)).fetchall()
+            links = cur.execute('SELECT * FROM links WHERE id IN (SELECT class_id FROM user_classes WHERE user_id = ?)', (session['user_id'],)).fetchall()
+            print(links)
+            print("============================")
             if links:
                 pass
             else:
-                links = []        
-        except:
-            classes = None
+                links = []  
+            if classes:
+                pass
+            else:
+                classes = []      
+        except Exception as err:
+            links = []
+            print(err)    
+            classes = []    
+
+        print(links)
         return render_template('classes.html', classes=classes, links=links)
 
 def apology(error, code=400):
