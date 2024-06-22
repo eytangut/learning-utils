@@ -3,3 +3,4 @@
 .idx/dev.nix
 *.nix
 .test
+*.py
