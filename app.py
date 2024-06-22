@@ -6,7 +6,6 @@ import datetime
 import google.generativeai as genai
 import sqlite3
 app = Flask(__name__)
-
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
@@ -14,7 +13,6 @@ con = sqlite3.connect('database.db', check_same_thread=False)
 cur = con.cursor()
 def configure_ai(api_key):
     genai.configure(api_key=api_key)
-configure_ai(os.environ.get('DEFAULT_API_KEY'))
 model = genai.GenerativeModel('gemini-1.5-flash')
 def login_required(f):
     """
@@ -163,10 +161,27 @@ def check_api(api_key, lastuse):
 @app.route('/api-guide')
 def api_guide():
     return render_template('api-guide.html')
+messeges = []
 @app.route('/chat', methods=['GET', 'POST'])
 @login_required
 def chat():
-    pass
+    if messeges == []:
+        messeges.append("You: Hi!")
+        messeges.append("Bot: How can i help you today?")
+
+    if request.method == 'POST':
+        messeges.append(f"You: {request.form.get('message')}")
+        if check_api(api_key=api_key, lastuse=LAST_USE):
+            messeges.append(f'Bot: {get_ai_response(request.form.get("message"), messeges)}')
+            
+    else:
+        api_key = cur.execute('SELECT * FROM api_keys WHERE user_id = ?', (session['user_id'],)).fetchall()
+        if not api_key == 'DEFAULT':
+            configure_ai(api_key=api_key)
+        return render_template('chat.html', messeges=messeges)
+def get_ai_response(input, history):
+    chat = model.start_chat(history=[])
+    return {'messege': chat.send_message(input), 'history': chat.history}
 def main():
     app.run(port=int(os.environ.get('PORT', 80)))
 
