@@ -2,4 +2,4 @@
 .idx
 .idx/dev.nix
 *.nix
-script.py
+.test
